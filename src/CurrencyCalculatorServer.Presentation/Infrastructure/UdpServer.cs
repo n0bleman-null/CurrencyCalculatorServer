@@ -67,14 +67,21 @@ public class UdpServer : IServer
                     scope.ServiceProvider
                         .GetRequiredService<ICurrencyCalculatorService>();
 
-                var result = await currencyCalculatorService.ConvertCurrency(model.Quantity,
-                    model.CurrencyCode,
-                    model.Date,
-                    cancellationToken);
+                try
+                {
+                    var result = await currencyCalculatorService.ConvertCurrency(model.Quantity,
+                        model.CurrencyCode,
+                        model.Date,
+                        cancellationToken);
 
-                var bytes = result.ToArray().GetBytesArray();
+                    var bytes = result.ToArray().GetBytesArray();
 
-                await _listener.SendAsync(bytes, sender, cancellationToken);
+                    await _listener.SendAsync(bytes, sender, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    await _listener.SendAsync(Array.Empty<byte>(), sender, cancellationToken);
+                }
             }
         };
     }

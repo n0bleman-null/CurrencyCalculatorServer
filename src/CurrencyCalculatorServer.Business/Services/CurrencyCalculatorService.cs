@@ -33,7 +33,13 @@ namespace CurrencyCalculatorServer.Business.Services
         /// <exception cref="System.ApplicationException">Unknown currency</exception>
         public async Task<List<GetConversionRatesResponse>> ConvertCurrency(double quantity, string currencyCode, DateTime date, CancellationToken token)
         {
+            if (quantity < 0)
+                throw new ApplicationException("Invalid quantity");
+
             var rates = await _ratesProvider.GetRatesByDay(date, token);
+
+            if (rates.Count == 0)
+                throw new ApplicationException("No data for day");
 
             var targetRate = rates.FirstOrDefault(e => e.Currency!.Abbreviation == currencyCode);
 
